@@ -64,14 +64,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
 
     ALPAKA_FN_HOST_ACC inline constexpr int getBin(float coord_,
                                                    int dim_) const {
-      int coord_Bin{(int)((coord_ - min_max.min(dim_)) / tile_size[dim_])};
       int coord_Bin;
-      if (T::wrapped[dim]) {
+      if (wrapped[dim_]) {
         coord_Bin =
             static_cast<int>((normalizeCoordinate(coord_, dim_) - min_max.min(dim_)) / tile_size[dim_]);
       } else {
         coord_Bin =
             static_cast<int>((coord_ - min_max.min(dim_)) / tile_size[dim_]);
+      }
 
 
       // Address the cases of underflow and overflow
@@ -98,7 +98,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
         auto bin_i = wrapped[dim] ? (Bins[dim] % n_tiles_per_dim) : Bins[dim];
         globalBin += alpaka::math::pow(acc, n_tiles_per_dim, Ndim - dim - 1) * bin_i;
       }
-      globalBin += wrapped[dim] ? (Bins[Ndim - 1] % n_tiles_per_dim) : Bins[Ndim - 1];
+      globalBin += wrapped[Ndim] ? (Bins[Ndim - 1] % n_tiles_per_dim) : Bins[Ndim - 1];
       return globalBin;
     }
 
@@ -125,12 +125,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
 
     ALPAKA_FN_HOST_ACC inline constexpr float distance(const float* coord_i, const float* coord_j) {
       float dist_sq = 0.f;
-      for (int dim = 0; dim != Ndim; ++dim)
-      if (wrapped[dim])
-        dist_sq += normalizeCoordinate(coord_i - coord_j, dim) * normalizeCoordinate(coord_i - coord_j, dim)
-      else
-        dist_sq += (coord_i - coord_j) * (coord_i - coord_j;
-        return dist_sq;
+      for (int dim = 0; dim != Ndim; ++dim) {
+        if (wrapped[dim])
+          dist_sq += normalizeCoordinate(coord_i - coord_j, dim) * normalizeCoordinate(coord_i - coord_j, dim);
+        else
+          dist_sq += (coord_i - coord_j) * (coord_i - coord_j);
+      }
+      return dist_sq;
     }
 
     ALPAKA_FN_HOST_ACC inline constexpr auto size() { return n_tiles; }

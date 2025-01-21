@@ -45,7 +45,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
                                   VecArray<int, max_followers>* d_followers,
                                   uint32_t n_points) const {
       for (auto index : alpaka::uniformElements(acc, n_points))
-        d_followers[index].reset()
+        d_followers[index].reset();
     }
   };
 
