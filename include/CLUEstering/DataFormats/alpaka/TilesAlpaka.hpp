@@ -38,12 +38,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
     ALPAKA_FN_HOST_ACC float& range(int i) { return m_data[2 * i + 1] - m_data[2 * i]; }
   };
 
-  template <typename TAcc, uint8_t Ndim>
+  template <uint8_t Ndim>
   class TilesAlpaka {
   public:
-    TilesAlpaka() {};
-
-    ALPAKA_FN_HOST_ACC inline void setAcc(const TAcc& Acc) { acc = Acc; };
+    TilesAlpaka() = default;
 
     ALPAKA_FN_HOST_ACC inline constexpr const float* minMax() const {
       return min_max.data();
@@ -62,7 +60,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
       this->m_tiles.resize(nTiles);
     }
 
-    ALPAKA_FN_HOST_ACC inline constexpr int getBin(float coord_,
+    template <typename TAcc>
+    ALPAKA_FN_HOST_ACC inline constexpr int getBin(const TAcc& acc,
+                                                   float coord_,
                                                    int dim_) const {
       int coord_Bin;
       if (wrapped[dim_]) {
@@ -81,7 +81,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
       return coord_Bin;
     }
 
-    ALPAKA_FN_HOST_ACC inline constexpr int getGlobalBin(const float* coords) const {
+    template <typename TAcc>
+    ALPAKA_FN_HOST_ACC inline constexpr int getGlobalBin(const TAcc& acc,
+                                                         const float* coords) const {
       int globalBin = 0;
       for (int dim = 0; dim != Ndim - 1; ++dim) {
         globalBin += alpaka::math::pow(acc, n_tiles_per_dim, Ndim - dim - 1) *
@@ -91,8 +93,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
       return globalBin;
     }
 
+    template <typename TAcc>
     ALPAKA_FN_HOST_ACC inline constexpr int getGlobalBinByBin(
-        const VecArray<uint32_t, Ndim>& Bins) const {
+        const TAcc& acc, const VecArray<uint32_t, Ndim>& Bins) const {
       uint32_t globalBin = 0;
       for (int dim = 0; dim != Ndim - 1; ++dim) {
         auto bin_i = wrapped[dim] ? (Bins[dim] % n_tiles_per_dim) : Bins[dim];
@@ -102,12 +105,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
       return globalBin;
     }
 
-    ALPAKA_FN_ACC inline constexpr void fill(const float* coords,
+    template <typename TAcc>
+    ALPAKA_FN_ACC inline constexpr void fill(const TAcc& acc,
+                                             const float* coords,
                                              int i) {
       m_tiles[getGlobalBin(acc, coords)].push_back(acc, i);
     }
 
+    template <typename TAcc>
     ALPAKA_FN_ACC inline void searchBox(
+        const TAcc& acc,
         const VecArray<VecArray<float, 2>, Ndim>& sb_extremes,
         VecArray<VecArray<uint32_t, 2>, Ndim>* search_box) {
       for (int dim{}; dim != Ndim; ++dim) {
@@ -123,7 +130,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
       }
     }
 
-    ALPAKA_FN_HOST_ACC inline constexpr float distance(const float* coord_i, const float* coord_j) {
+    ALPAKA_FN_ACC inline float distance(const float* coord_i, const float* coord_j) {
       float dist_sq = 0.f;
       for (int dim = 0; dim != Ndim; ++dim) {
         if (wrapped[dim])
@@ -163,7 +170,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
       return remainder;
     }
 
-    TAcc acc;
     std::size_t n_tiles;
     int n_tiles_per_dim;
     int wrapped[Ndim];

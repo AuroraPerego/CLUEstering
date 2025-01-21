@@ -24,13 +24,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
   class CLUEAlgoAlpaka {
   public:
     CLUEAlgoAlpaka() = delete;
-    explicit CLUEAlgoAlpaka(float dc, float rhoc, float dm, int pPBin, Queue& queue_, Acc1D& acc)
+    explicit CLUEAlgoAlpaka(float dc, float rhoc, float dm, int pPBin, Queue queue_)
         : dc_{dc}, rhoc_{rhoc}, dm_{dm}, pointsPerTile_{pPBin} {
       init_device(queue_);
-      d_tiles->setAcc(acc);
     }
 
-    TilesAlpaka<Acc1D, Ndim>* m_tiles;
+    TilesAlpaka<Ndim>* m_tiles;
     VecArray<int32_t, reserve>* m_seeds;
     VecArray<int32_t, max_followers>* m_followers;
 
@@ -52,7 +51,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
     /* domain_t<Ndim> m_domains; */
 
     // Buffers
-    std::optional<clue::device_buffer<Device, TilesAlpaka<Acc1D, Ndim>>> d_tiles;
+    std::optional<clue::device_buffer<Device, TilesAlpaka<Ndim>>> d_tiles;
     std::optional<clue::device_buffer<Device, VecArray<int32_t, reserve>>> d_seeds;
     std::optional<clue::device_buffer<Device, clue::VecArray<int32_t, max_followers>[]>>
         d_followers;
@@ -94,7 +93,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
 
   template <uint8_t Ndim>
   void CLUEAlgoAlpaka<Ndim>::init_device(Queue queue_) {
-    d_tiles = clue::make_device_buffer<TilesAlpaka<Acc1D, Ndim>>(queue_);
+    d_tiles = clue::make_device_buffer<TilesAlpaka<Ndim>>(queue_);
     d_seeds = clue::make_device_buffer<VecArray<int32_t, reserve>>(queue_);
     d_followers =
         clue::make_device_buffer<VecArray<int32_t, max_followers>[]>(queue_, reserve);

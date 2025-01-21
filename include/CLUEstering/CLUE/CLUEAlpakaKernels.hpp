@@ -28,7 +28,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
   struct KernelResetTiles {
     template <typename TAcc, uint8_t Ndim>
     ALPAKA_FN_ACC void operator()(TAcc const& acc,
-                                  TilesAlpaka<TAcc, Ndim>* tiles,
+                                  TilesAlpaka<Ndim>* tiles,
                                   uint32_t nTiles,
                                   uint32_t nPerDim) const {
       if (alpaka::oncePerGrid(acc)) {
@@ -53,7 +53,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
     template <typename TAcc, uint8_t Ndim>
     ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                   PointsAlpakaView* points,
-                                  TilesAlpaka<TAcc, Ndim>* tiles,
+                                  TilesAlpaka<Ndim>* tiles,
                                   uint32_t n_points) const {
       for (auto index : alpaka::uniformElements(acc, n_points)) {
         float coords[Ndim];
@@ -68,7 +68,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
       const TAcc& acc,
       VecArray<uint32_t, Ndim>& base_vec,
       const VecArray<VecArray<uint32_t, 2>, Ndim>& search_box,
-      TilesAlpaka<TAcc, Ndim>* tiles,
+      TilesAlpaka<Ndim>* tiles,
       PointsAlpakaView* dev_points,
       const KernelType& kernel,
       /* const VecArray<VecArray<float, 2>, Ndim>& domains, */
@@ -121,7 +121,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
   struct KernelCalculateLocalDensity {
     template <typename TAcc, uint8_t Ndim, typename KernelType>
     ALPAKA_FN_ACC void operator()(const TAcc& acc,
-                                  TilesAlpaka<TAcc, Ndim>* dev_tiles,
+                                  TilesAlpaka<Ndim>* dev_tiles,
                                   PointsAlpakaView* dev_points,
                                   const KernelType& kernel,
                                   /* const VecArray<VecArray<float, 2>, Ndim>& domains, */
@@ -168,7 +168,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
       const TAcc& acc,
       VecArray<uint32_t, Ndim>& base_vec,
       const VecArray<VecArray<uint32_t, 2>, Ndim>& s_box,
-      TilesAlpaka<TAcc, Ndim>* tiles,
+      TilesAlpaka<Ndim>* tiles,
       PointsAlpakaView* dev_points,
       /* const VecArray<VecArray<float, 2>, Ndim>& domains, */
       const float* coords_i,
@@ -235,9 +235,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
   struct KernelCalculateNearestHigher {
     template <typename TAcc, uint8_t Ndim>
     ALPAKA_FN_ACC void operator()(const TAcc& acc,
-                                  TilesAlpaka<TAcc, Ndim>* dev_tiles,
+                                  TilesAlpaka<Ndim>* dev_tiles,
                                   PointsAlpakaView* dev_points,
-                                  /* const VecArray<VecArray<float, 2>, Ndim>& domains, */
                                   float dm,
                                   float,
                                   uint32_t n_points) const {
