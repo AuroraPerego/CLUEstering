@@ -34,8 +34,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
     ALPAKA_FN_HOST_ACC float& min(int i) { return m_data[2 * i]; }
     ALPAKA_FN_HOST_ACC float max(int i) const { return m_data[2 * i + 1]; }
     ALPAKA_FN_HOST_ACC float& max(int i) { return m_data[2 * i + 1]; }
-    ALPAKA_FN_HOST_ACC float range(int i) const { return m_data[2 * i + 1] - m_data[2 * i]; }
-    ALPAKA_FN_HOST_ACC float& range(int i) { return m_data[2 * i + 1] - m_data[2 * i]; }
+    ALPAKA_FN_HOST_ACC float range(int i) const { return max(i) - min(i); }
+    ALPAKA_FN_HOST_ACC float& range(int i) { auto tmp = max(i) - min(i); return tmp; }
   };
 
   template <uint8_t Ndim>
@@ -101,7 +101,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
         auto bin_i = wrapped[dim] ? (Bins[dim] % n_tiles_per_dim) : Bins[dim];
         globalBin += alpaka::math::pow(acc, n_tiles_per_dim, Ndim - dim - 1) * bin_i;
       }
-      globalBin += wrapped[Ndim] ? (Bins[Ndim - 1] % n_tiles_per_dim) : Bins[Ndim - 1];
+      globalBin += wrapped[Ndim - 1] ? (Bins[Ndim - 1] % n_tiles_per_dim) : Bins[Ndim - 1];
       return globalBin;
     }
 
@@ -160,7 +160,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
 
   private:
 
-    float normalizeCoordinate(float coord, int dim){
+    ALPAKA_FN_HOST_ACC inline constexpr float normalizeCoordinate(float coord, int dim) const {
       const float range = min_max.range(dim);
       float remainder = coord - static_cast<int>(coord / range) * range;
       if (remainder >= min_max.max(dim))
