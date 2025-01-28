@@ -35,10 +35,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
     ALPAKA_FN_HOST_ACC float max(int i) const { return m_data[2 * i + 1]; }
     ALPAKA_FN_HOST_ACC float& max(int i) { return m_data[2 * i + 1]; }
     ALPAKA_FN_HOST_ACC float range(int i) const { return max(i) - min(i); }
-    ALPAKA_FN_HOST_ACC float& range(int i) {
-      auto tmp = max(i) - min(i);
-      return tmp;
-    }
   };
 
   template <uint8_t Ndim>
@@ -56,6 +52,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
     }
     ALPAKA_FN_HOST_ACC inline constexpr float* tileSize() { return tile_size; }
 
+    ALPAKA_FN_HOST_ACC inline constexpr const int* wrapped() const { return m_wrapped; }
+    ALPAKA_FN_HOST_ACC inline constexpr int* wrapped() { return m_wrapped; }
+
     ALPAKA_FN_HOST_ACC void resizeTiles(std::size_t nTiles, int nPerDim) {
       this->n_tiles = nTiles;
       this->n_tiles_per_dim = nPerDim;
@@ -68,7 +67,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
                                                    float coord_,
                                                    int dim_) const {
       int coord_Bin;
-      if (wrapped[dim_]) {
+      if (m_wrapped[dim_]) {
         coord_Bin = static_cast<int>(
             (normalizeCoordinate(coord_, dim_) - min_max.min(dim_)) / tile_size[dim_]);
       } else {
@@ -99,11 +98,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
         const TAcc& acc, const VecArray<uint32_t, Ndim>& Bins) const {
       uint32_t globalBin = 0;
       for (int dim = 0; dim != Ndim - 1; ++dim) {
-        auto bin_i = wrapped[dim] ? (Bins[dim] % n_tiles_per_dim) : Bins[dim];
+        auto bin_i = m_wrapped[dim] ? (Bins[dim] % n_tiles_per_dim) : Bins[dim];
         globalBin += alpaka::math::pow(acc, n_tiles_per_dim, Ndim - dim - 1) * bin_i;
       }
       globalBin +=
-          wrapped[Ndim - 1] ? (Bins[Ndim - 1] % n_tiles_per_dim) : Bins[Ndim - 1];
+          m_wrapped[Ndim - 1] ? (Bins[Ndim - 1] % n_tiles_per_dim) : Bins[Ndim - 1];
       return globalBin;
     }
 
@@ -123,7 +122,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
         VecArray<uint32_t, 2> dim_sb;
         auto infBin = getBin(acc, sb_extremes[dim][0], dim);
         auto supBin = getBin(acc, sb_extremes[dim][1], dim);
-        if (wrapped[dim] and infBin > supBin)
+        if (m_wrapped[dim] and infBin > supBin)
           supBin += n_tiles_per_dim;
         dim_sb.push_back_unsafe(infBin);
         dim_sb.push_back_unsafe(supBin);
@@ -135,11 +134,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
     ALPAKA_FN_ACC inline float distance(const float* coord_i, const float* coord_j) {
       float dist_sq = 0.f;
       for (int dim = 0; dim != Ndim; ++dim) {
-        if (wrapped[dim])
-          dist_sq += normalizeCoordinate(coord_i - coord_j, dim) *
-                     normalizeCoordinate(coord_i - coord_j, dim);
+        if (m_wrapped[dim])
+          dist_sq += normalizeCoordinate(coord_i[dim] - coord_j[dim], dim) *
+                     normalizeCoordinate(coord_i[dim] - coord_j[dim], dim);
         else
-          dist_sq += (coord_i - coord_j) * (coord_i - coord_j);
+          dist_sq += (coord_i[dim] - coord_j[dim]) * (coord_i[dim] - coord_j[dim]);
       }
       return dist_sq;
     }
@@ -175,7 +174,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE_CLUE {
 
     std::size_t n_tiles;
     int n_tiles_per_dim;
-    int wrapped[Ndim];
+    int m_wrapped[Ndim];
     CoordinateExtremes<Ndim> min_max;
     float tile_size[Ndim];
     VecArray<VecArray<uint32_t, max_tile_depth>, max_n_tiles> m_tiles;
