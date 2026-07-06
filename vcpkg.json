@@ -3,7 +3,7 @@
   "version-string": "2.11.0",
   "description": "Header-only density-based weighted clustering using alpaka",
   "homepage": "https://github.com/cms-patatrack/CLUEstering",
-  "dependencies": ["alpaka","boost-atomic"],
+  "dependencies": ["alpaka"],
   "features": {
     "tests": {
       "description": "Build tests",

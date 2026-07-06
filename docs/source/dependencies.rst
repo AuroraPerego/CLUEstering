@@ -23,7 +23,6 @@ CLUEstering requires:
 
 - **Alpaka** version 1.2.0  
 - **C++20 compiler**  
-- **Boost** version 1.78.0 or later  
 
 Additional dependencies depending on the chosen backend:
 

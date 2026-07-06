@@ -20,7 +20,6 @@ set(CMAKE_CXX_FLAGS_RELEASE
     " -O2 -funroll-loops -funsafe-math-optimizations -ftree-vectorize -march=native"
 )
 
-find_package(Boost 1.75.0 REQUIRED)
 find_package(benchmark REQUIRED)
 
 find_package(alpaka 2.1.0)

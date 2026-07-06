@@ -31,11 +31,6 @@ else()
   )
 endif()
 
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-
-find_package(Boost REQUIRED COMPONENTS atomic)
-
 include(FetchContent)
 
 find_package(alpaka 2.1.0)

@@ -30,8 +30,6 @@ endif()
 set(PYBIND11_FINDPYTHON ON)
 set(PYBIND11_PYTHON_VERSION ">=3.8")
 
-find_package(Boost 1.75.0 REQUIRED COMPONENTS atomic)
-
 include(FetchContent)
 FetchContent_Declare(
   alpaka
@@ -46,8 +44,7 @@ pybind11_add_module(CLUE_Convolutional_Kernels NO_EXTRAS SHARED
                     ${CMAKE_CURRENT_SOURCE_DIR}/binding_kernels.cpp)
 target_include_directories(CLUE_Convolutional_Kernels
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
-target_link_libraries(CLUE_Convolutional_Kernels PRIVATE alpaka::alpaka
-                                                         Boost::atomic)
+target_link_libraries(CLUE_Convolutional_Kernels PRIVATE alpaka::alpaka)
 target_compile_definitions(
   CLUE_Convolutional_Kernels PRIVATE ALPAKA_HOST_ONLY
                                      ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED)
